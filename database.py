@@ -20,7 +20,7 @@ def init_db():
 def get_all_tasks():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM tasks ORDER BY created_at DESC")
+    cursor.execute("SELECT * FROM tasks ORDER BY id DESC")
     rows = cursor.fetchall()
     conn.close()
     return rows
