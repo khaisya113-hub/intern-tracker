@@ -1,45 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intern Task Tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Intern Task Tracker</h1>
+    <div class="container">
+        <header>
+            <h1>Intern <span>Task Tracker</span></h1>
+            <div class="stats">
+                <div><strong>{{ tasks|length }}</strong>Total</div>
+                <div><strong>{{ tasks|selectattr(3, 'equalto', 'pending')|list|length }}</strong>Pending</div>
+                <div><strong>{{ tasks|selectattr(3, 'equalto', 'in-progress')|list|length }}</strong>In Progress</div>
+                <div><strong>{{ tasks|selectattr(3, 'equalto', 'done')|list|length }}</strong>Done</div>
+            </div>
+        </header>
 
-    <form action="/add" method="POST">
-        <input type="text" name="title" placeholder="Task title" required>
-        <input type="text" name="description" placeholder="Description">
-        <button type="submit">Add Task</button>
-    </form>
+        <div class="card">
+            <h2>Add New Task</h2>
+            <form action="/add" method="POST" class="add-form">
+                <input type="text" name="title" placeholder="Task title" required>
+                <input type="text" name="description" placeholder="Description (optional)">
+                <button type="submit">+ Add</button>
+            </form>
+        </div>
 
-    <table>
-        <tr>
-            <th>ID</th><th>Title</th><th>Description</th>
-            <th>Status</th><th>Created</th><th>Actions</th>
-        </tr>
-        {% for task in tasks %}
-        <tr>
-            <td>{{ task[0] }}</td>
-            <td>{{ task[1] }}</td>
-            <td>{{ task[2] }}</td>
-            <td>{{ task[3] }}</td>
-            <td>{{ task[4] }}</td>
-            <td>
-                <form action="/update/{{ task[0] }}" method="POST" style="display:inline">
-                    <select name="status">
-                        <option value="pending">Pending</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="done">Done</option>
-                    </select>
-                    <button type="submit">Update</button>
-                </form>
-                <form action="/delete/{{ task[0] }}" method="POST" style="display:inline">
-                    <button type="submit">Delete</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+        <div class="card">
+            <h2>Tasks</h2>
+            {% if tasks %}
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Task</th>
+                        <th style="width: 130px;">Status</th>
+                        <th style="width: 260px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td style="color: var(--text-muted);">{{ task[0] }}</td>
+                        <td>
+                            <div class="task-title">{{ task[1] }}</div>
+                            {% if task[2] %}<div class="task-desc">{{ task[2] }}</div>{% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {{ task[3] }}">{{ task[3] }}</span>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <form action="/update/{{ task[0] }}" method="POST">
+                                    <select name="status" onchange="this.form.submit()">
+                                        <option value="pending" {% if task[3] == 'pending' %}selected{% endif %}>Pending</option>
+                                        <option value="in-progress" {% if task[3] == 'in-progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="done" {% if task[3] == 'done' %}selected{% endif %}>Done</option>
+                                    </select>
+                                </form>
+                                <form action="/delete/{{ task[0] }}" method="POST">
+                                    <button type="submit" class="danger" onclick="return confirm('Delete this task?')">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">
+                <div class="empty-icon">📋</div>
+                <p>No tasks yet. Add one above to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </body>
 </html>
